@@ -1,0 +1,2230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Health Nursing • Clinical Review & Exam Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #060913;
+      --surface: #0f172a;
+      --surface-elevated: #1e293b;
+      --surface-border: #334155;
+      --text-primary: #f8fafc;
+      --text-muted: #94a3b8;
+      --brand-primary: #3b82f6;
+      --brand-glow: rgba(59, 130, 246, 0.25);
+      --accent-gold: #f59e0b;
+      --accent-glow: rgba(245, 158, 11, 0.2);
+      --highlight-bg: rgba(245, 158, 11, 0.16);
+      --highlight-text: #fbbf24;
+      --highlight-border: #d97706;
+      --font-main: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f8fafc;
+      --surface: #ffffff;
+      --surface-elevated: #f1f5f9;
+      --surface-border: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-muted: #64748b;
+      --brand-primary: #2563eb;
+      --brand-glow: rgba(37, 99, 235, 0.12);
+      --accent-gold: #d97706;
+      --accent-glow: rgba(217, 119, 6, 0.12);
+      --highlight-bg: #fef3c7;
+      --highlight-text: #92400e;
+      --highlight-border: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: var(--font-main);
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .font-mono-code {
+      font-family: var(--font-mono);
+    }
+
+    /* Ambient background grid */
+    .clinical-grid-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.10) 0%, transparent 40%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+    }
+
+    [data-theme="light"] .clinical-grid-bg {
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.06) 0%, transparent 35%),
+        linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+    }
+
+    /* Highlighted keyword focus badge */
+    .focused {
+      background: var(--highlight-bg);
+      color: var(--highlight-text);
+      border-bottom: 2px solid var(--highlight-border);
+      font-weight: 800;
+      padding: 0.15rem 0.45rem;
+      border-radius: 0.375rem;
+      display: inline;
+      box-shadow: 0 1px 3px var(--accent-glow);
+    }
+
+    /* 3D Flashcard Flip Mechanics */
+    .perspective-card {
+      perspective: 1000px;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .card-inner.is-flipped {
+      transform: rotateY(180deg);
+    }
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 1rem;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Option States */
+    .option-correct-state {
+      background: rgba(16, 185, 129, 0.16) !important;
+      border-color: #10b981 !important;
+      color: #10b981 !important;
+      font-weight: 700;
+    }
+    .option-wrong-state {
+      background: rgba(239, 68, 68, 0.16) !important;
+      border-color: #ef4444 !important;
+      color: #ef4444 !important;
+      font-weight: 700;
+    }
+    .option-eliminated-state {
+      opacity: 0.22;
+      text-decoration: line-through;
+      pointer-events: none;
+      filter: grayscale(1);
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--surface-border);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+  </style>
+</head>
+<body data-theme="dark" class="relative selection:bg-blue-500 selection:text-white">
+  <div class="clinical-grid-bg"></div>
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+  <header class="sticky top-0 z-40 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-800 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        
+        <!-- Brand & Context -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-amber-500 p-0.5 shadow-lg shadow-blue-500/20 flex items-center justify-center text-white text-lg font-black">
+              ⚕️
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs uppercase font-extrabold tracking-wider text-blue-400 font-mono-code">CHN-PRO</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Comprehensive Notes & Exam</span>
+              </div>
+              <h1 class="text-base sm:text-lg font-bold text-white tracking-tight">Community Health Nursing Portal</h1>
+            </div>
+          </div>
+
+          <!-- Mobile Quick Theme Toggle -->
+          <button onclick="toggleTheme()" class="md:hidden p-2 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 text-sm">
+            🌓
+          </button>
+        </div>
+
+        <!-- Central Navigation Pills -->
+        <nav class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs sm:text-sm font-semibold shadow-inner">
+          <button id="nav-btn-notes" onclick="switchTab('notes')" class="px-4 py-2 rounded-lg transition-all text-white bg-blue-600 shadow-md">
+            📚 Study Notes (All Text)
+          </button>
+          <button id="nav-btn-quiz" onclick="switchTab('quiz')" class="px-4 py-2 rounded-lg transition-all text-slate-400 hover:text-white">
+            ✍️ Exam MCQ (30)
+          </button>
+          <button id="nav-btn-cards" onclick="switchTab('cards')" class="px-4 py-2 rounded-lg transition-all text-slate-400 hover:text-white">
+            🗂️ Flashcards
+          </button>
+        </nav>
+
+        <!-- Live Scoreboard & Controls -->
+        <div class="flex items-center gap-2.5 flex-wrap justify-between md:justify-end">
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono-code font-bold">
+            <span class="text-slate-400">Score:</span>
+            <span id="top-score-display" class="text-blue-400 font-extrabold">0</span>
+            <span class="text-slate-600">/ 30</span>
+          </div>
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs font-mono-code font-bold text-amber-400">
+            <span>🔥 Streak:</span>
+            <span id="top-streak-display">0</span>
+          </div>
+          <button onclick="openTimerDrawer()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center gap-1.5">
+            ⏱️ <span id="timer-badge-summary">15s Rule</span>
+          </button>
+          <button onclick="toggleSound()" id="sound-btn" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs">
+            🔊
+          </button>
+          <button onclick="toggleTheme()" class="hidden md:inline-flex p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs">
+            🌓
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Timer Modal Drawer -->
+  <div id="timer-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 text-left">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">⏱️</span>
+          <div>
+            <h3 class="text-base font-bold text-white">Timer & Exam Behavior Rules</h3>
+            <p class="text-xs text-slate-400">Zero question fading • Customizable limits</p>
+          </div>
+        </div>
+        <button onclick="closeTimerDrawer()" class="text-slate-400 hover:text-white p-1 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm">
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="font-semibold text-white">Per-Question Time Limit:</span>
+            <span id="label-per-question-time" class="font-mono-code font-bold text-blue-400">15s</span>
+          </div>
+          <input type="range" id="input-q-seconds" min="0" max="60" step="5" value="15" oninput="updateTimerPreviewLabel(this.value, 'q')" class="w-full accent-blue-500 cursor-pointer">
+          <p class="text-[11px] text-slate-400">Set to <strong class="text-blue-400">0s</strong> for Untimed Mode (no countdown pressure).</p>
+        </div>
+
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="font-semibold text-white">Auto-Advance Delay (Post-Answer):</span>
+            <span id="label-advance-delay" class="font-mono-code font-bold text-amber-400">10s</span>
+          </div>
+          <input type="range" id="input-advance-seconds" min="0" max="30" step="2" value="10" oninput="updateTimerPreviewLabel(this.value, 'adv')" class="w-full accent-amber-500 cursor-pointer">
+          <p class="text-[11px] text-slate-400">Set to <strong class="text-amber-400">0s</strong> to disable auto-advance and review at your own pace.</p>
+        </div>
+
+        <div class="space-y-2.5 pt-1">
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input type="checkbox" id="check-audio-ticks" checked class="w-4 h-4 rounded text-blue-600 bg-slate-800 border-slate-700">
+            <span class="text-slate-300">Play audio warning click when under 5s</span>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer">
+            <input type="checkbox" id="check-show-countdown-number" checked class="w-4 h-4 rounded text-blue-600 bg-slate-800 border-slate-700">
+            <span class="text-slate-300">Show big countdown timer badge</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+        <button onclick="restoreTimerDefaults()" class="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300">
+          Restore Defaults (15s/10s)
+        </button>
+        <button onclick="saveTimerSettings()" class="px-5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg">
+          Apply & Save
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+
+    <!-- TAB 1: STUDY NOTES VIEW (Comprehensive Text Display) -->
+    <div id="tab-notes-view" class="space-y-6">
+      
+      <!-- Toolbar & Lecture Selector -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="relative w-full md:w-96">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-xs">🔍</span>
+            <input 
+              type="text" 
+              id="notes-search-input" 
+              oninput="handleNotesSearch(this.value)" 
+              placeholder="Search complete lecture texts, keywords, concepts..." 
+              class="w-full pl-9 pr-3.5 py-2.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition shadow-inner">
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="expandAllLectureCards(true)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+              📂 Expand All
+            </button>
+            <button onclick="expandAllLectureCards(false)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+              📁 Collapse All
+            </button>
+            <button onclick="window.print()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+              🖨️ Print Notes
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Chips for Lectures 1-6 -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+          <button onclick="filterNotesByLecture('all')" class="lec-chip active px-3.5 py-1.5 rounded-full font-bold bg-blue-600 text-white">All Lectures (1–6)</button>
+          <button onclick="filterNotesByLecture(1)" class="lec-chip px-3 py-1.5 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Lec 1: Foundation</button>
+          <button onclick="filterNotesByLecture(2)" class="lec-chip px-3 py-1.5 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Lec 2: Assessment</button>
+          <button onclick="filterNotesByLecture(3)" class="lec-chip px-3 py-1.5 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Lec 3: PHC</button>
+          <button onclick="filterNotesByLecture(4)" class="lec-chip px-3 py-1.5 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Lec 4: Family</button>
+          <button onclick="filterNotesByLecture(5)" class="lec-chip px-3 py-1.5 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Lec 5: School Health</button>
+          <button onclick="filterNotesByLecture(6)" class="lec-chip px-3 py-1.5 rounded-full font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">Lec 6: Health Promotion</button>
+        </div>
+      </div>
+
+      <!-- Notes Accordion Container -->
+      <div id="notes-container" class="space-y-6">
+        <!-- Rendered completely by JavaScript -->
+      </div>
+    </div>
+
+    <!-- TAB 2: INTERACTIVE QUIZ VIEW -->
+    <div id="tab-quiz-view" class="space-y-6 hidden">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-lg space-y-3">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="btn-quiz-single" onclick="setQuizMode('single')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow">
+              Single Question View
+            </button>
+            <button id="btn-quiz-list" onclick="setQuizMode('list')" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300">
+              Full List View (30)
+            </button>
+            <button onclick="shuffleQuestions()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+              🔀 Shuffle Items
+            </button>
+            <button onclick="resetQuizState()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+              🔄 Reset Quiz
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="btn-quiz-pause" onclick="togglePauseExam()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30">
+              ⏸️ Pause Timer
+            </button>
+            <button id="btn-advance-pause" onclick="toggleAutoAdvance()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+              ⏸️ Pause Auto-Next
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-1 pt-1">
+          <div class="flex justify-between items-center text-xs font-mono-code text-slate-400">
+            <span id="quiz-answered-count">Answered: 0 / 30</span>
+            <span id="quiz-percentage">0% Completed</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
+            <div id="quiz-progress-fill" class="h-full bg-gradient-to-r from-blue-500 to-amber-500 w-0 transition-all duration-300"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Jump Question Grid -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+        <div class="text-[11px] font-bold text-slate-400 mb-2 flex items-center justify-between">
+          <span>Question Grid:</span>
+          <div class="flex items-center gap-3">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Correct</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Incorrect</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Active</span>
+          </div>
+        </div>
+        <div id="quiz-dots-matrix" class="flex flex-wrap gap-1.5"></div>
+      </div>
+
+      <!-- Floating Countdown (No Fading) -->
+      <div id="countdown-hud" class="text-center relative -mb-8 pointer-events-none z-10 transition-all">
+        <span id="countdown-hud-num" class="font-mono-code text-5xl font-black text-amber-500 drop-shadow-md">15</span>
+      </div>
+
+      <!-- Question Cards Mount -->
+      <div id="quiz-cards-container" class="space-y-6"></div>
+
+      <!-- Single Navigation Footnote -->
+      <div id="quiz-single-nav" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+        <button id="btn-nav-prev" onclick="goToPrevQuestion()" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 disabled:opacity-30 disabled:pointer-events-none">
+          ⬅️ Previous
+        </button>
+        <span id="quiz-single-indicator" class="text-xs font-extrabold text-blue-400 font-mono-code">Question 1 of 30</span>
+        <button id="btn-nav-next" onclick="goToNextQuestion()" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow disabled:opacity-30 disabled:pointer-events-none">
+          Next ➡️
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 3: FLASHCARDS VIEW -->
+    <div id="tab-cards-view" class="space-y-6 hidden">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>🗂️</span> High-Yield Flashcard Drills
+          </h2>
+          <p class="text-xs text-slate-400">Click any card to flip and review the focused core concept.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="flipAllCards(true)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+            Flip All to Back
+          </button>
+          <button onclick="flipAllCards(false)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+            Reset to Front
+          </button>
+        </div>
+      </div>
+
+      <div id="flashcards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </div>
+
+  </main>
+
+  <script>
+    /* Audio Synthesis */
+    let audioCtx = null;
+    let isSoundMuted = false;
+
+    function getAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      return audioCtx;
+    }
+
+    function emitAudio(type) {
+      if (isSoundMuted) return;
+      try {
+        const ctx = getAudio();
+        if (ctx.state === 'suspended') ctx.resume();
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        const t = ctx.currentTime;
+
+        if (type === 'correct') {
+          osc.frequency.setValueAtTime(523.25, t);
+          osc.frequency.exponentialRampToValueAtTime(783.99, t + 0.15);
+          gain.gain.setValueAtTime(0.18, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+          osc.start(t);
+          osc.stop(t + 0.3);
+        } else if (type === 'wrong') {
+          osc.frequency.setValueAtTime(280, t);
+          osc.frequency.exponentialRampToValueAtTime(140, t + 0.2);
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+          osc.start(t);
+          osc.stop(t + 0.28);
+        } else if (type === 'tick') {
+          osc.frequency.setValueAtTime(900, t);
+          gain.gain.setValueAtTime(0.03, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+          osc.start(t);
+          osc.stop(t + 0.04);
+        } else if (type === 'action') {
+          osc.frequency.setValueAtTime(440, t);
+          osc.frequency.exponentialRampToValueAtTime(660, t + 0.12);
+          gain.gain.setValueAtTime(0.1, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+          osc.start(t);
+          osc.stop(t + 0.18);
+        }
+      } catch (e) {
+        console.warn('Audio unavailable:', e);
+      }
+    }
+
+    function toggleSound() {
+      isSoundMuted = !isSoundMuted;
+      document.getElementById('sound-btn').innerText = isSoundMuted ? '🔇' : '🔊';
+    }
+
+    function toggleTheme() {
+      const cur = document.body.getAttribute('data-theme');
+      document.body.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+    }
+
+    /* FULL LECTURE ARCHIVE DATA - Complete unedited content for Study Notes */
+    const lectureModules = [
+      {
+        num: 1,
+        title: "Foundation of Community Health Nursing / Public Health",
+        overview: [
+          "A community is a collection of people who share some important feature of their lives, interact, have common interests or characteristics and sense of unity or belonging.",
+          "The function of any community includes its members’ collective sense of belonging and their shared identity, values, norms, communication, common interests and concerns."
+        ],
+        topics: [
+          {
+            id: 1,
+            numStr: "01",
+            title: "Population Concept",
+            bullets: [
+              `The term population refers to all of the people occupying an area or to all of those who share one or more characteristics.`
+            ],
+            focusedText: "The term population refers to all of the people occupying an area or to all of those who share one or more characteristics."
+          },
+          {
+            id: 2,
+            numStr: "02",
+            title: "Promotion of Health",
+            bullets: [
+              "Includes all efforts that seek to move people closer to optimal well-being or higher levels of wellness.",
+              "Health promotion programs and activities include many forms of health education.",
+              `Community health promotion, then, encompasses the development and management of preventive health care services that are responsive to community health needs e.g., <span class="focused">Wellness programs in schools and industry</span>.`
+            ],
+            focusedText: "Wellness programs in schools and industry"
+          },
+          {
+            id: 3,
+            numStr: "03",
+            title: "The Greatest Good for the Greatest Number of People",
+            bullets: [
+              "C/PHNs are concerned about several aggregates at the same time, service will, of necessity, be provided to multiple and overlapping groups.",
+              `e.g. <span class="focused">The nurse gives vaccines to everyone who are low risk or high risk in order to protect the community from the flu virus.</span>`
+            ],
+            focusedText: "The nurse gives vaccines to everyone who are low risk or high risk in order to protect the community from the flu virus."
+          },
+          {
+            id: 4,
+            numStr: "04",
+            title: "Cultural Humility vs Cultural Competence",
+            bullets: [
+              `Cultural humility is an understanding that <span class="focused">self-awareness about one’s own culture</span> is an ongoing process, and an acknowledgment that we must approach others as equals, with respect for their prevailing beliefs and cultural norms.`,
+              "*Cultural competence is the standard to help guide the delivery of health care to individuals and to populations, whereas cultural humility is the underlying quality needed to truly implement interventions to improve health in partnership with communities and populations."
+            ],
+            focusedText: "self-awareness about one’s own culture"
+          },
+          {
+            id: 5,
+            numStr: "05",
+            title: "Occupational Health Settings",
+            bullets: [
+              `<span class="focused">Business and industry</span> provide another group of settings for community/public health nursing practice.`,
+              "Employee health has long been recognized as making a vital contribution to individual lives, the productivity of business, and the well-being of the entire nation.",
+              "Organizations are expected to provide a safe and healthy work environment, in addition to offering insurance for health care."
+            ],
+            focusedText: "Business and industry"
+          }
+        ]
+      },
+      {
+        num: 2,
+        title: "Community Assessment, Diagnosis, Planning and Intervention",
+        overview: [],
+        topics: [
+          {
+            id: 6,
+            numStr: "06",
+            title: "Population-Focused Assessment",
+            bullets: [
+              "An assessment can be focused on a specific population for purposes of planning and developing intervention programs. A population-focused assessment, for example, might focus on pregnant women or immigrants living within a community.",
+              `A population-focused assessment can also focus on a <span class="focused">certain age range, population with a specific health characteristic that may put the group at risk</span> (e.g., children or, specifically, children with disabilities).`
+            ],
+            focusedText: "certain age range, population with a specific health characteristic that may put the group at risk"
+          },
+          {
+            id: 7,
+            numStr: "07",
+            title: "Community Forums and Social Media",
+            bullets: [
+              `The community forum or town hall meeting is a qualitative assessment method designed to obtain community opinions. It takes place in the neighborhood of the people involved, perhaps in a <span class="focused">school gymnasium or an auditorium</span>. The participants are selected to participate by invitation from the group organizing the forum.`,
+              "Town halls are used to elicit public opinion on a variety of issues, including health care concerns, political views, and feelings about issues in the public eye, such as school safety."
+            ],
+            focusedText: "school gymnasium or an auditorium"
+          },
+          {
+            id: 8,
+            numStr: "08",
+            title: "Program Implementation",
+            bullets: [
+              "Five stages related to program implementation:",
+              "1. Community accepting the program.",
+              "2. Specifying tasks and estimating needed resources.",
+              "3. Developing specific plans for program activity.",
+              "4. Establishing a mechanism for program management.",
+              `5. <span class="focused">Putting the plan into action</span>`
+            ],
+            focusedText: "Putting the plan into action"
+          },
+          {
+            id: 9,
+            numStr: "09",
+            title: "Formative Evaluation",
+            bullets: [
+              "Formative evaluation essentially looks at the step-by-step process of program implementation.",
+              "Could I do anything better or differently to increase my desired outcome?",
+              "An example: Would occur when looking at the poor attendance at two sessions of an evening health promotion class for senior citizens.",
+              "The nurse identifies the reason for poor attendance as being seniors’ reluctance to attend an evening class because they either don’t drive at night, have low vision at night, or fear coming out in the dark.",
+              `The class is <span class="focused">rescheduled</span> for midmorning, and the attendance dramatically increases.`
+            ],
+            focusedText: "rescheduled"
+          },
+          {
+            id: 10,
+            numStr: "10",
+            title: "Nursing Process Characteristics: Adaptable",
+            bullets: [
+              `Its dynamic nature enables the community health nurse to adjust appropriately to each situation and to be flexible in applying the process to aggregate health needs. Furthermore, its flexibility is <span class="focused">a reminder to the nurse that each client group and each community situation is unique.</span>`
+            ],
+            focusedText: "a reminder to the nurse that each client group and each community situation is unique."
+          }
+        ]
+      },
+      {
+        num: 3,
+        title: "Primary Health Care (PHC)",
+        overview: [],
+        topics: [
+          {
+            id: 11,
+            numStr: "11",
+            title: "Principles of Primary Health Care: Community Participation",
+            bullets: [
+              "Involves voluntary service by community members for their health care.",
+              `It is a social approach emphasizing <span class="focused">collaboration</span>.`,
+              "Participants identify health needs, plan, organize, make decisions, and implement programs (government or non-governmental sponsored).",
+              "Ensures effective planning and evaluation of health services."
+            ],
+            focusedText: "collaboration"
+          },
+          {
+            id: 12,
+            numStr: "12",
+            title: "Types of Vaccines",
+            bullets: [
+              `<strong>Live-attenuated vaccines:</strong> attenuated (or weakened) form of the germ that causes a disease. These vaccines are very similar to the natural infection and therefore help protect against the infection by creating a strong and long-lasting immune response.`,
+              `<strong>Inactivated vaccines:</strong> dead version of the germ that causes a disease. The immunity (protection) they provide is usually not as strong as that provided by live vaccines. Therefore, several doses may be needed over time to gain ongoing immunity against diseases, e.g. hepatitis A, influenza, polio, and rabies.`
+            ],
+            focusedText: "Live-attenuated (weakened) vs Inactivated (dead)"
+          },
+          {
+            id: 13,
+            numStr: "13",
+            title: "Vaccines Routes of Administration",
+            bullets: [
+              `<span class="focused">ID- BCG is administered intradermally</span>`,
+              "• IM- used for many vaccines such as: HepB, DTaP, Hib, PCV, IPV, MCV4, HepA, HPV, Tdap",
+              "• SC- used for selected vaccines such as: IPV, measles, varicella, MMR",
+              "• Oral- used for selected vaccines such as: RV, OPV"
+            ],
+            focusedText: "ID- BCG is administered intradermally"
+          },
+          {
+            id: 14,
+            numStr: "14",
+            title: "Secondary Prevention",
+            bullets: [
+              "Secondary prevention is a major activity in primary care.",
+              `Secondary prevention focuses on <span class="focused">identifying individuals with subclinical disease and initiating early treatment</span>.`,
+              `The activity usually associated with secondary prevention is <span class="focused">screening</span>.`,
+              "The long-term goal of secondary prevention is to reduce both morbidity and mortality within a specific population.",
+              "Examples: blood pressure assessments, age/risk cancer screening."
+            ],
+            focusedText: "identifying individuals with subclinical disease and initiating early treatment / screening"
+          },
+          {
+            id: 15,
+            numStr: "15",
+            title: "Why Case Management Matters",
+            bullets: [
+              `Better <span class="focused">coordination</span> >> Better continuity >> fewer gaps in care >> better patient outcomes.`,
+              "Outcomes:",
+              "• Positive impact on cost containment",
+              "• Improves the quality of patient care",
+              "• Improve the overall health of the community"
+            ],
+            focusedText: "coordination"
+          }
+        ]
+      },
+      {
+        num: 4,
+        title: "Family as Client",
+        overview: [],
+        topics: [
+          {
+            id: 16,
+            numStr: "16",
+            title: "Family Structure",
+            bullets: [
+              "• Nuclear family is defined as a husband, wife, and their children—biological, adopted, or both (Friedman, 1998).",
+              "• Extended family consists of those members of the nuclear family and other blood-related persons such as grandparents, aunts, uncles, and cousins.",
+              `• <span class="focused">Blended family a family unit composed of a married couple and their offspring including some from previous marriages.</span>`,
+              "• Single parent family occurs by means of divorce, separation, death of a spouse, or choice. 90% of them are comprised of single mothers and their children."
+            ],
+            focusedText: "Blended family a family unit composed of a married couple and their offspring including some from previous marriages."
+          },
+          {
+            id: 17,
+            numStr: "17",
+            title: "Functions of the Family",
+            bullets: [
+              "1. Procreation and Rearing of Children",
+              "2. Provision of Home",
+              "3. Socialization",
+              "4. Economic functions",
+              `5. <span class="focused">Educational functions</span> (e.g., parents teaching children healthy food habits, handwashing, and personal hygiene)`,
+              "6. Religious functions",
+              "7. Health related functions",
+              "8. Recreational function",
+              "9. Cultural functions",
+              "10. Social functions"
+            ],
+            focusedText: "Educational functions"
+          },
+          {
+            id: 18,
+            numStr: "18",
+            title: "Family as System",
+            bullets: [
+              "A family is an interacting system rather than a collection of isolated individuals.",
+              "A change in one member can affect other members and the family as a whole.",
+              "Family patterns can maintain health or contribute to health problems.",
+              "The nurse looks for patterns, connections, and feedback.",
+              `Example: Child’s asthma → <span class="focused">Parent stress and fatigue</span> → Difficulty maintaining routines → Poor asthma management → <span class="focused">More asthma attacks</span> → More family stress.`
+            ],
+            focusedText: "Parent stress and fatigue - More asthma attacks"
+          },
+          {
+            id: 19,
+            numStr: "19",
+            title: "Social Determinants of Health",
+            bullets: [
+              "Income, housing, education, employment, food access, transport, and social support affect family health.",
+              "Barriers can reduce access to preventive and treatment services.",
+              "Assess practical barriers before assuming poor motivation or nonadherence.",
+              "Link families with appropriate community and health resources.",
+              `Example: A family has a sick child, but they have <span class="focused">limited money and transportation problems, so they miss healthcare appointments</span>. The community nurse helps the family find affordable healthcare and transportation support.`
+            ],
+            focusedText: "limited money and transportation problems, so they miss healthcare appointments"
+          },
+          {
+            id: 20,
+            numStr: "20",
+            title: "Genogram",
+            bullets: [
+              `<span class="focused">A genogram is a visual representation of family structure across generations.</span>`,
+              "It can show relationships, important life events, and selected health information.",
+              "It helps the nurse identify patterns that may not be obvious in conversation.",
+              "Use symbols consistently and explain them to the family."
+            ],
+            focusedText: "A genogram is a visual representation of family structure across generations."
+          }
+        ]
+      },
+      {
+        num: 5,
+        title: "School Health Nursing",
+        overview: [],
+        topics: [
+          {
+            id: 21,
+            numStr: "21",
+            title: "Common Health Problems of School-Age Children: Poverty",
+            bullets: [
+              "Some specific physical health problems are related to poverty (e.g., lead poisoning, iron deficiency anemia, increased susceptibility to illness).",
+              "Children living in poverty have poorer health and are more likely to suffer from a chronic health condition (e.g., asthma, anemia), as well as injuries and accidents.",
+              `Adolescents living in poverty: <span class="focused">physical health problems are related to poverty, poorer health, experience depression and mental health problems and engage in more health risk behaviors</span> (e.g., smoking, early sexual activity).`
+            ],
+            focusedText: "physical health problems are related to poverty, poorer health, experience depression and mental health problems and engage in more health risk behaviors"
+          },
+          {
+            id: 22,
+            numStr: "22",
+            title: "Head Lice (Pediculosis)",
+            bullets: [
+              "Preschoolers and elementary-age children and their caretakers and family members are at highest risk for head lice.",
+              `School nurses and PHNs need to <span class="focused">educate families about reducing reinfestations by careful application of pediculicides, retreating in 2 weeks if necessary, and cleaning of any fomites</span> (e.g., combs, hats, towels, sheets, clothing, upholstered furniture) and removal of any viable nits.`
+            ],
+            focusedText: "educate families about reducing reinfestations by careful application of pediculicides, retreating in 2 weeks if necessary, and cleaning of any fomites"
+          },
+          {
+            id: 23,
+            numStr: "23",
+            title: "Levels of Prevention in School Context",
+            bullets: [
+              "Primary Prevention:",
+              `• <span class="focused">Immunizations</span>: School nurses promote and support students’ vaccination according to recommended immunization schedules to prevent vaccine preventable diseases.`,
+              "• Violence Prevention: School nurses provide education and awareness programs to prevent bullying, violence, and other forms of aggression among students.",
+              "• Outreach to Immigrant Populations: School nurses provide culturally appropriate health education and connect immigrant students and their families with available health services to prevent health problems and improve access to care."
+            ],
+            focusedText: "Immunizations"
+          },
+          {
+            id: 24,
+            numStr: "24",
+            title: "Key Roles of the School Nurse",
+            bullets: [
+              "1. Facilitates the normal development of students and promotes positive intervention outcomes.",
+              "2. Provides leadership in the areas of health promotion, safety, and a healthy school environment.",
+              `3. Provides high-quality health care and promotes <span class="focused">early intervention</span> for actual and potential student health problems.`,
+              "4. Uses sound clinical judgment in the provision of case management for students.",
+              "5. Collaborates actively and professionally with others to promote student/family capacity for self-management and adaptation, as well as learning and self advocacy."
+            ],
+            focusedText: "early intervention"
+          },
+          {
+            id: 25,
+            numStr: "25",
+            title: "Responsibilities of the School Nurse",
+            bullets: [
+              "1) Prevent illness, promote & maintain health of school community.",
+              "2) Identify health-related barriers to learning.",
+              "3) Care of children with special health needs.",
+              `4) General and emergency <span class="focused">first aid</span>.`,
+              "5) Vision, hearing, scoliosis, and TB screenings; height, weight, and blood pressure monitoring; oral health and dental education; immunization assessment and monitoring.",
+              "6) Medication administration; assessment of acute health problems.",
+              "7) Health examinations, referrals.",
+              "8) Participate in emergency planning and disaster drills, as well as school evacuation plans.",
+              "9) Training staff in CPR, infection precautions, first aid.",
+              "10) Overseeing the health and wellness of school staff."
+            ],
+            focusedText: "first aid"
+          }
+        ]
+      },
+      {
+        num: 6,
+        title: "Health Promotion / Community Mobilization",
+        overview: [],
+        topics: [
+          {
+            id: 26,
+            numStr: "26",
+            title: "Tertiary Prevention",
+            bullets: [
+              "Tertiary prevention attempts to reduce the extent and severity of a health problem to its lowest possible level, so as to minimize disability and restore or preserve function.",
+              "Examples:",
+              "• Include treatment and rehabilitation of persons after a stroke to reduce impairment",
+              `• <span class="focused">Postmastectomy exercise programs to restore function</span>`,
+              "• Treatment and management of diabetes to reduce problems or slow their progress"
+            ],
+            focusedText: "Postmastectomy exercise programs to restore function"
+          },
+          {
+            id: 27,
+            numStr: "27",
+            title: "Evolutionary Change",
+            bullets: [
+              "Evolutionary change is change that is gradual and requires adjustment on an incremental basis. It modifies rather than replaces a current way of operating.",
+              `Some <span class="focused">examples of evolutionary change include becoming parents, gradually cutting back on the number of cigarettes smoked each day, and losing weight by eliminating desserts and snacks</span>.`,
+              "Gradual change may “ease the pain” that change brings to some individuals. Sometimes, this type of change may be viewed as reform."
+            ],
+            focusedText: "examples of evolutionary change include becoming parents, gradually cutting back on the number of cigarettes smoked each day, and losing weight by eliminating desserts and snacks"
+          },
+          {
+            id: 28,
+            numStr: "28",
+            title: "Revolutionary Change",
+            bullets: [
+              "In contrast, is a more rapid, drastic, and threatening type of change. It involves different goals and perhaps radically new patterns of behavior.",
+              `<span class="focused">Sudden unemployment, stopping smoking overnight or removing children from abusive parents are examples of revolutionary changes.</span>`,
+              "The people affected have little or no advance warning and little or no time to prepare. High levels of emotional, mental, and sometimes physical energy and rapid behavior change are required to adapt to revolutionary change. If the demands are too great, some may experience defense mechanisms such as incapacitation, resistance, or denial of the new situation."
+            ],
+            focusedText: "Sudden unemployment, stopping smoking overnight or removing children from abusive parents are examples of revolutionary changes"
+          },
+          {
+            id: 29,
+            numStr: "29",
+            title: "Empiric–Rational Change Strategies",
+            bullets: [
+              "Empiric–rational change strategies are used to effect change based on the assumption that people are rational and, when presented with empiric information, will adopt new practices that appear to be in their best interest.",
+              `To use this approach, which is common in community health, <span class="focused">new information is offered to people</span>. The nurse/change agent uses empiric–rational strategies with clients who can assume a relatively high degree of <span class="focused">responsibility</span> for their own health.`
+            ],
+            focusedText: "new information is offered to people., responsibility"
+          },
+          {
+            id: 30,
+            numStr: "30",
+            title: "Community Mobilization: Action Cycle",
+            bullets: [
+              "The action cycle of community mobilization:",
+              "• Step 1: Identify a significant health problem, for example female circumcision.",
+              "• Step 2: Plan and select a strategy to solve the problem (for example, conduct a workshop for influential people in the community for sensitization on the issue).",
+              `• Step 3: <span class="focused">Identify key actors and stakeholders</span> (village chief, Imam, heads of families, etc.)`,
+              "• Step 4: Mobilize these key actors and stakeholders for action (discussions and agreement on what to do).",
+              "• Step 5: Implement activities to work towards a solution (capitalize on the sensitization created by the workshop and intensify through follow-up).",
+              "• Step 6: Assess the results of the activities carried out to solve the problem.",
+              "• Step 7: Improve activities, based on the findings of the assessment."
+            ],
+            focusedText: "Identify key actors and stakeholders"
+          }
+        ]
+      }
+    ];
+
+    /* EXAM & QUIZ DATABASE (30 ITEMS WITH DETAILED QUESTIONS, OPTIONS, CITATIONS) */
+    const masterItems = [
+      {
+        id: 1,
+        lectureNum: 1,
+        lectureName: "Lecture 1: Foundation of Community Health Nursing",
+        title: "Population Concept",
+        focusedSnippet: "The term population refers to all of the people occupying an area or to all of those who share one or more characteristics.",
+        sourceQuote: "01-\nThe term population refers to all of the people occupying an area or to all of those who share one or more characteristics.\n\nfocused \" The term population refers to all of the people occupying an area or to all of those who share one or more characteristics.\"",
+        hint: "All individuals occupying a geographic territory or sharing shared attributes.",
+        question: "Which definition correctly identifies a 'population' in community health nursing practice?",
+        options: [
+          "All of the people occupying an area or to all of those who share one or more characteristics",
+          "Only nuclear family members documented in a local civil registry",
+          "Hospitalized patients in acute intensive care units",
+          "A board of elected hospital administrators setting institutional policy"
+        ],
+        answer: 0,
+        explanation: "By definition, 'population' refers to all of the people occupying an area or to all of those who share one or more characteristics."
+      },
+      {
+        id: 2,
+        lectureNum: 1,
+        lectureName: "Lecture 1: Foundation of Community Health Nursing",
+        title: "Promotion of Health",
+        focusedSnippet: "Wellness programs in schools and industry",
+        sourceQuote: "02-\nPromotion of Health:\n• includes all efforts that seek to move people closer to optimal well-being or higher levels of wellness.\n• Health promotion programs and activities include many forms of health education\n• Community health promotion, then, encompasses the development and management of preventive health care services that are responsive to community health needs e.g., Wellness programs in schools and industry\n\nfocused \"Wellness programs in schools and industry\"",
+        hint: "Programs in academic and industrial settings promoting optimal wellness.",
+        question: "Which of the following serves as a key example of community health promotion programs?",
+        options: [
+          "Wellness programs in schools and industry",
+          "Emergency cardiac catheterization during acute infarction",
+          "Hospital isolation after an outbreak has spread",
+          "Tertiary surgical intensive care rehabilitation"
+        ],
+        answer: 0,
+        explanation: "Community health promotion encompasses preventive health services responsive to community needs, like wellness programs in schools and industry."
+      },
+      {
+        id: 3,
+        lectureNum: 1,
+        lectureName: "Lecture 1: Foundation of Community Health Nursing",
+        title: "The Greatest Good for the Greatest Number",
+        focusedSnippet: "The nurse gives vaccines to everyone who are low risk or high risk in order to protect the community from the flu virus.",
+        sourceQuote: "03-\nThe greatest good for the greatest number of people\nC/PHNs are concerned about several aggregates at the same time, service will, of necessity, be provided to multiple and overlapping groups.\ne.g. The nurse gives vaccines to everyone who are low risk or high risk in order to protect the community from the flu virus.\n\nfocused \"The nurse gives vaccines to everyone who are low risk or high risk in order to protect the community from the flu virus.\"",
+        hint: "Administering immunizations across all risk strata to protect the entire group.",
+        question: "Which nursing intervention exemplifies 'the greatest good for the greatest number'?",
+        options: [
+          "The nurse gives vaccines to everyone who are low risk or high risk in order to protect the community from the flu virus",
+          "Offering flu vaccines exclusively to corporate executives with private insurance",
+          "Restricting vaccinations only to patients in tertiary care hospitals",
+          "Providing home visits solely to referrals from commercial private clinics"
+        ],
+        answer: 0,
+        explanation: "Vaccinating both low- and high-risk members protects the entire community, achieving the greatest good for the greatest number."
+      },
+      {
+        id: 4,
+        lectureNum: 1,
+        lectureName: "Lecture 1: Foundation of Community Health Nursing",
+        title: "Cultural Humility",
+        focusedSnippet: "self-awareness about one’s own culture",
+        sourceQuote: "04-\nCultural humility is an understanding that self-awareness about one’s own culture is an ongoing process, and an acknowledgment that we must approach others as equals, with respect for their prevailing beliefs and cultural norms.\n*Cultural competence is the standard to help guide the delivery of health care to individuals and to populations, whereas cultural humility is the underlying quality needed to truly implement interventions to improve health in partnership with communities and populations.\n\nfocused \" self-awareness about one’s own culture \"",
+        hint: "Recognizing that reflecting on one's own cultural lens is continuous.",
+        question: "Cultural humility requires which fundamental, lifelong personal commitment from the nurse?",
+        options: [
+          "Self-awareness about one’s own culture while approaching others as equals",
+          "Memorizing rigid cultural checklists for every demographic",
+          "Assuming Western clinical customs are superior in all contexts",
+          "Dismissing community traditions during therapeutic discussions"
+        ],
+        answer: 0,
+        explanation: "Cultural humility involves continuous self-awareness of one's own culture and approaching community members as equals."
+      },
+      {
+        id: 5,
+        lectureNum: 1,
+        lectureName: "Lecture 1: Foundation of Community Health Nursing",
+        title: "Occupational Health Settings",
+        focusedSnippet: "Business and industry",
+        sourceQuote: "05-\nOccupational health settings\nBusiness and industry provide another group of settings for community/public health nursing practice. Employee health has long been recognized as making a vital contribution to individual lives, the productivity of business, and the well-being of the entire nation. Organizations are expected to provide a safe and healthy work environment, in addition to offering insurance for health care.\n\nfocused \"Business and industry\"",
+        hint: "Corporate and factory environments where employee wellness is safeguarded.",
+        question: "In occupational health nursing, which group of settings provides a vital platform for worker health and productivity?",
+        options: [
+          "Business and industry",
+          "Tertiary inpatient surgical wards",
+          "Ambulance dispatch centers",
+          "Veterinary quarantine agencies"
+        ],
+        answer: 0,
+        explanation: "Business and industry provide vital settings where community nurses safeguard worker health and national productivity."
+      },
+      {
+        id: 6,
+        lectureNum: 2,
+        lectureName: "Lecture 2: Community Assessment, Planning & Intervention",
+        title: "Population-Focused Assessment",
+        focusedSnippet: "certain age range, population with a specific health characteristic that may put the group at risk",
+        sourceQuote: "06-\nPopulation-focused assessment:\n• An assessment can be focused on a specific population for purposes of planning and developing intervention programs. A population-focused assessment, for example, might focus on pregnant women or immigrants living within a community.\n• A population-focused assessment can also focus on a certain age range or a population with a specific health characteristic that may put the group at risk (e.g., children or, specifically, children with disabilities).\n\nfocused \" certain age range, population with a specific health characteristic that may put the group at risk\"",
+        hint: "Targets an age cohort or a specific vulnerability such as disabilities.",
+        question: "A population-focused community health assessment targets which of the following groups?",
+        options: [
+          "A group focused on a certain age range or a specific health characteristic putting them at risk",
+          "Every citizen nationwide regardless of risk factors or geography",
+          "Only hospital-based surgical nursing personnel",
+          "Individuals enrolled exclusively in private health HMOs"
+        ],
+        answer: 0,
+        explanation: "Population-focused assessments examine specific aggregates, like an age bracket or a population with high-risk clinical characteristics."
+      },
+      {
+        id: 7,
+        lectureNum: 2,
+        lectureName: "Lecture 2: Community Assessment, Planning & Intervention",
+        title: "Community Forums",
+        focusedSnippet: "school gymnasium or an auditorium",
+        sourceQuote: "07-\nCommunity Forums and Social Media\n• The community forum or town hall meeting is a qualitative assessment method designed to obtain community opinions. It takes place in the neighborhood of the people involved, perhaps in a school gymnasium or an auditorium. The participants are selected to participate by invitation from the group organizing the forum.\n• Town halls are used to elicit public opinion on a variety of issues, including health care concerns, political views, and feelings about issues in the public eye, such as school safety.\n\nfocused \"school gymnasium or an auditorium\"",
+        hint: "Spacious, accessible neighborhood venues like school gyms or auditoriums.",
+        question: "When holding a town hall forum to collect community opinions, where does the meeting typically take place?",
+        options: [
+          "In accessible neighborhood venues, such as a school gymnasium or an auditorium",
+          "Inside a locked intensive care conference room",
+          "At an international executive resort",
+          "In an attorney's private office"
+        ],
+        answer: 0,
+        explanation: "Community forums take place directly in neighborhood venues like school auditoriums or gyms so local residents can attend easily."
+      },
+      {
+        id: 8,
+        lectureNum: 2,
+        lectureName: "Lecture 2: Community Assessment, Planning & Intervention",
+        title: "Program Implementation",
+        focusedSnippet: "Putting the plan into action",
+        sourceQuote: "08-\nProgram Implementation\nFive stages related to program implementation:\n1. Community accepting the program.\n2. Specifying tasks and estimating needed resources.\n3. Developing specific plans for program activity.\n4. Establishing a mechanism for program management.\n5. Putting the plan into action\n\nfocused \" Putting the plan into action \"",
+        hint: "The fifth operational milestone in program implementation.",
+        question: "What constitutes the fifth stage in community health program implementation?",
+        options: [
+          "Putting the plan into action",
+          "Drafting the preliminary funding proposal",
+          "Conducting preliminary needs surveys",
+          "Developing abstract theoretical nursing models"
+        ],
+        answer: 0,
+        explanation: "Stage 5 of community program implementation is directly defined as: Putting the plan into action."
+      },
+      {
+        id: 9,
+        lectureNum: 2,
+        lectureName: "Lecture 2: Community Assessment, Planning & Intervention",
+        title: "Formative Evaluation",
+        focusedSnippet: "rescheduled",
+        sourceQuote: "09-\nFormative Evaluation\n• Formative evaluation essentially looks at the step-by-step process of program implementation.\n• Could I do anything better or differently to increase my desired outcome?\n• An example: Would occur when looking at the poor attendance at two sessions of an evening health promotion class for senior citizens.\n• The nurse identifies the reason for poor attendance as being seniors’ reluctance to attend an evening class because they either don’t drive at night, have low vision at night, or fear coming out in the dark.\n• The class is rescheduled for midmorning, and the attendance dramatically increases.\n\nfocused \"rescheduled\"",
+        hint: "Adjusting class hours to midmorning eliminated attendance barriers.",
+        question: "When seniors miss evening classes due to night vision issues, adjusting the schedule illustrates which formative outcome?",
+        options: [
+          "The class is rescheduled to eliminate barriers and improve desired attendance",
+          "The program is terminated and judged an irrecoverable failure",
+          "Senior participants are fined for nonattendance",
+          "Course standards are diluted"
+        ],
+        answer: 0,
+        explanation: "Formative evaluation examines the process in real-time; rescheduling the class to midmorning removed barriers and boosted attendance."
+      },
+      {
+        id: 10,
+        lectureNum: 2,
+        lectureName: "Lecture 2: Community Assessment, Planning & Intervention",
+        title: "Adaptable Nursing Process",
+        focusedSnippet: "a reminder to the nurse that each client group and each community situation is unique",
+        sourceQuote: "10-\nNursing Process Characteristics Used in Community Health Nursing\n\nAdaptable\n• Its dynamic nature enables the community health nurse to adjust appropriately to each situation and to be flexible in applying the process to aggregate health needs. Furthermore, its flexibility is a reminder to the nurse that each client group and each community situation is unique.\n\nfocused \" a reminder to the nurse that each client group and each community situation is unique.\"",
+        hint: "Dynamic flexibility underscores that no two aggregate communities are alike.",
+        question: "Why is the adaptable and flexible nature of the community nursing process indispensable?",
+        options: [
+          "It serves as a reminder to the nurse that each client group and community situation is unique",
+          "It allows clinicians to omit required legal documentation",
+          "It proves that one static protocol works identically for every town",
+          "It eliminates the need to complete community assessments"
+        ],
+        answer: 0,
+        explanation: "Flexibility reminds the community nurse that each aggregate population and local setting has distinctive characteristics."
+      },
+      {
+        id: 11,
+        lectureNum: 3,
+        lectureName: "Lecture 3: Primary Health Care (PHC)",
+        title: "Community Participation",
+        focusedSnippet: "collaboration",
+        sourceQuote: "11-\nPrinciples of the primary health care\nCommunity Participation\n• Involves voluntary service by community members for their health care.\n• It is a social approach emphasizing collaboration.\n• Participants identify health needs, plan, organize, make decisions, and implement programs (government or non governmental sponsored).\n• Ensures effective planning and evaluation of health services.\n\nfocused \" collaboration\"",
+        hint: "A mutual partnership between local citizens and healthcare institutions.",
+        question: "In Primary Health Care (PHC), community participation is characterized as a social approach that emphasizes what?",
+        options: [
+          "Collaboration between community members and health systems",
+          "Unilateral mandates handed down by central ministries",
+          "Passive submission to hospital directors",
+          "Total privatization of regional health clinics"
+        ],
+        answer: 0,
+        explanation: "Community participation is fundamentally a collaborative approach empowering residents to partner with health programs."
+      },
+      {
+        id: 12,
+        lectureNum: 3,
+        lectureName: "Lecture 3: Primary Health Care (PHC)",
+        title: "Types of Vaccines",
+        focusedSnippet: "Live-attenuated (weakened) vs Inactivated (dead)",
+        sourceQuote: "12-\nTypes of vaccines\nLive-attenuated vaccines: attenuated (or weakened) form of the germ that causes a disease.\n*These vaccines are very similar to the natural infection and therefore help protect against the infection by creating a strong and long-lasting immune response\n\nInactivated vaccines: dead version of the germ that causes a disease.\n*The immunity (protection) they provide is usually not as strong as that provided by live vaccines. Therefore, several doses may be needed over time to gain ongoing immunity against diseases, e.g. hepatitis A, influenza, polio, and rabies.",
+        hint: "Live uses attenuated pathogens for durable immunity; inactivated uses killed microbes requiring boosters.",
+        question: "What is the key functional difference between live-attenuated and inactivated vaccines?",
+        options: [
+          "Live-attenuated vaccines use a weakened germ creating strong, long-lasting immunity; inactivated use dead germs often requiring multiple doses",
+          "Inactivated vaccines contain living germs; live-attenuated contain dead fragments",
+          "Both vaccines use non-biological synthetic minerals without biological antigenicity",
+          "Inactivated vaccines always confer lifetime immunity from a single pediatric dose"
+        ],
+        answer: 0,
+        explanation: "Live vaccines use attenuated (weakened) microorganisms mimicking natural infection for prolonged immunity; inactivated vaccines use dead germs needing boosters over time."
+      },
+      {
+        id: 13,
+        lectureNum: 3,
+        lectureName: "Lecture 3: Primary Health Care (PHC)",
+        title: "Vaccine Routes",
+        focusedSnippet: "ID- BCG is administered intradermally",
+        sourceQuote: "13-\nVaccines Routes of Administration\nID- BCG is administered intradermally\n• IM- used for many vaccins such as:\n• HepB, DTaP, Hib, PCV, IPV, MCV4, HepA, HPV, Tdap \n• SC- used for selected vaccines such as:\nIPV, measles, varicella, MMR\n• Oral- used for selected vaccins such as: RV, OPV\n\nfocused \"ID- BCG is administered intradermally\"",
+        hint: "Injected directly into the intradermal layer of the dermis.",
+        question: "Which vaccine is correctly matched with its required route of administration?",
+        options: [
+          "ID - BCG is administered intradermally",
+          "IM - BCG is administered intramuscularly",
+          "Oral - Hepatitis B vaccine is given orally",
+          "IV - Measles and MMR are given by rapid intravenous infusion"
+        ],
+        answer: 0,
+        explanation: "BCG vaccine against tuberculosis is administered intradermally (ID) into the dermis."
+      },
+      {
+        id: 14,
+        lectureNum: 3,
+        lectureName: "Lecture 3: Primary Health Care (PHC)",
+        title: "Secondary Prevention",
+        focusedSnippet: "identifying individuals with subclinical disease and initiating early treatment / screening",
+        sourceQuote: "14-\nSecondary Prevention\n• Secondary prevention is a major activity in primary care. \n• Secondary prevention focuses on identifying individuals with subclinical disease and initiating early treatment. \n• The activity usually associated with secondary prevention is screening.\n• The long-term goal of secondary prevention is to reduce both morbidity and mortality within a specific population.\n• Examples: blood pressure assessments, age/risk cancer screening \n\nfocused \"  identifying individuals with subclinical disease and initiating early treatment. \" or \" screening\"",
+        hint: "Screening asymptomatic individuals to detect occult disease early.",
+        question: "What is the core clinical focus of secondary prevention in community practice?",
+        options: [
+          "Identifying individuals with subclinical disease and initiating early treatment through screening",
+          "Performing extensive surgical amputations to preserve terminal function",
+          "Delivering routine early childhood immunizations to prevent illness acquisition",
+          "Sanitizing municipal sewage conduits at the reservoir level"
+        ],
+        answer: 0,
+        explanation: "Secondary prevention focuses on detecting subclinical pathology early through screenings (e.g. mammography, blood pressure checks) to curtail morbidity."
+      },
+      {
+        id: 15,
+        lectureNum: 3,
+        lectureName: "Lecture 3: Primary Health Care (PHC)",
+        title: "Case Management",
+        focusedSnippet: "coordination",
+        sourceQuote: "15-\nWhy does of case management matters?\n• Better coordination  >> Better continuity >> fewer gaps in care >> better patents outcomes. \nOutcomes:\n• Positive impact on cost containment\n• Improves the quality of patient care \n• Improve the overall health of the community\n\nfocused \"coordination\"",
+        hint: "Connecting disparate care elements to prevent fragmented care.",
+        question: "In community health practice, why is case management vital for patient care pathways?",
+        options: [
+          "Better coordination leads to improved continuity, fewer gaps in care, and superior patient outcomes",
+          "It eliminates the need for multidisciplinary clinical consultations",
+          "It ensures patients remain admitted inside acute hospital facilities indefinitely",
+          "It substitutes clinical nursing judgment with automated billing systems"
+        ],
+        answer: 0,
+        explanation: "Effective case management ensures seamless care coordination, creating continuity and eliminating gaps in treatment."
+      },
+      {
+        id: 16,
+        lectureNum: 4,
+        lectureName: "Lecture 4: Family as Client",
+        title: "Family Structure: Blended",
+        focusedSnippet: "Blended family a family unit composed of a married couple and their offspring including some from previous marriages",
+        sourceQuote: "16-\nFamily Structure \n• Nuclear family is defined as a husband, wife, and their children—biological, adopted, or both (Friedman, 1998) \n• Extended family consists of those members of the nuclear family and other blood-related persons such as grandparents, aunts, uncles, and cousins. \n• Blended family a family unit composed of a married couple and their offspring in cluding some from previous marriages. \n• Single parent family occurs by means of divorce, separation, death of a spouse, or choice. 90% of them are comprised of single mothers and their children.\n\nfocused \" Blended family a family unit composed of a married couple and their offspring in cluding some from previous marriages. \"",
+        hint: "A family bringing together spouses and offspring from previous marriages.",
+        question: "Which of the following definitions designates a 'blended family' structure?",
+        options: [
+          "A family unit composed of a married couple and their offspring including some from previous marriages",
+          "A household consisting solely of biological parents and direct children",
+          "A multigenerational residence containing grandparents, uncles, and cousins",
+          "A household formed by single individuals sharing living quarters without dependents"
+        ],
+        answer: 0,
+        explanation: "A blended family comprises a married couple and their children, which includes children originating from previous relationships or marriages."
+      },
+      {
+        id: 17,
+        lectureNum: 4,
+        lectureName: "Lecture 4: Family as Client",
+        title: "Functions of Family",
+        focusedSnippet: "Educational functions",
+        sourceQuote: "17-\nFunction of the family \n\n1. Procreation and Rearing of Children \n2. Provision of Home \n3. Socialization \n4. Economic functions \n5. Educational functions \n6. Religious functions \n7. Health related functions \n8. Recreational function \n9. Cultural functions \n10. Social functions\n\nfocused \" Educational functions \" make example if parents teach heathy food hygiene etch",
+        hint: "Parents instilling hand hygiene, balanced diets, and wholesome habits.",
+        question: "When parents teach their children personal hygiene, tooth brushing, and healthy eating, which family function is being fulfilled?",
+        options: [
+          "Educational functions",
+          "Strictly economic allocation functions",
+          "Recreational pastime functions",
+          "Legislative governance functions"
+        ],
+        answer: 0,
+        explanation: "Teaching life practices such as hygiene, food sanitation, and self-care is a hallmark of the family's educational function."
+      },
+      {
+        id: 18,
+        lectureNum: 4,
+        lectureName: "Lecture 4: Family as Client",
+        title: "Family as System",
+        focusedSnippet: "Parent stress and fatigue - More asthma attacks",
+        sourceQuote: "18-\nFamily as System\n• A family is an interacting system rather than a collection of isolated individuals.\n• A change in one member can affect other members and the family as a whole.\n• Family patterns can maintain health or contribute to health problems.\n• The nurse looks for patterns, connections, and feedback.\n• Example: Child’s asthma → Parent stress and fatigue → Difficulty maintaining routines → Poor asthma management → More asthma attacks → More family stress\n\nfocused \" Parent stress and fatigue - More asthma attacks \"",
+        hint: "A recursive feedback loop where parental exhaustion leads to worsening symptoms.",
+        question: "In family systems theory, how does a child's chronic asthma illustrate circular feedback within the family unit?",
+        options: [
+          "Child asthma triggers parent stress and fatigue, disrupting routines and causing poor management with more asthma attacks",
+          "The child's disease remains completely insulated from family emotional dynamics",
+          "Parental psychological stress cures physiological airway hyperreactivity",
+          "Household routines have no impact on medication management or acute flare-ups"
+        ],
+        answer: 0,
+        explanation: "Family systems theory posits that member stressors interconnect: child asthma triggers parental exhaustion, destabilizing daily care and inducing recurrent attacks."
+      },
+      {
+        id: 19,
+        lectureNum: 4,
+        lectureName: "Lecture 4: Family as Client",
+        title: "Social Determinants",
+        focusedSnippet: "limited money and transportation problems, so they miss healthcare appointments",
+        sourceQuote: "19-\nSocial Determinants\n\n• Income, housing, education, employment, food access, transport, and social support affect family health.\n• Barriers can reduce access to preventive and treatment services.\n• Assess practical barriers before assuming poor motivation or nonadherence.\n• Link families with appropriate community and health resources.\n• Example: A family has a sick child, but they have limited money and transportation problems, so they miss healthcare appointments. The community nurse helps the family find affordable healthcare and transportation support.\n\nfocused \" limited money and transportation problems, so they miss healthcare appointments\"",
+        hint: "Financial and transit roadblocks preventing appointment follow-through.",
+        question: "A family with a chronically sick child misses clinic visits. What must the community nurse investigate before assuming apathy or noncompliance?",
+        options: [
+          "Practical barriers such as limited money and transportation problems",
+          "Whether the family should be reported to child protective authorities immediately",
+          "The parents' IQ score and willingness to obey orders",
+          "Discontinuing all further nursing care outreach"
+        ],
+        answer: 0,
+        explanation: "Nurses should evaluate practical social determinants (e.g. lack of bus fare or funds) before assuming nonadherence or poor motivation."
+      },
+      {
+        id: 20,
+        lectureNum: 4,
+        lectureName: "Lecture 4: Family as Client",
+        title: "Genogram Utility",
+        focusedSnippet: "A genogram is a visual representation of family structure across generations",
+        sourceQuote: "20-\nGenogram\n• A genogram is a visual representation of family structure across generations.\n• It can show relationships, important life events, and selected health information.\n• It helps the nurse identify patterns that may not be obvious in conversation.\n• Use symbols consistently and explain them to the family.\n\nfocused \" • A genogram is a visual representation of family structure across generations.\"",
+        hint: "A multi-generational pedigree mapping lineage, relationships, and hereditary illnesses.",
+        question: "What is the primary diagnostic purpose of constructing a family genogram?",
+        options: [
+          "To provide a visual representation of family structure and health patterns across generations",
+          "To itemize personal bank account ledgers and mortgage payments",
+          "To calculate individual caloric intakes for nutritional records",
+          "To draft legal testamentary inheritances for hospital lawyers"
+        ],
+        answer: 0,
+        explanation: "A genogram provides a visual multi-generational map illustrating structural lineage, relationships, and hereditary health conditions."
+      },
+      {
+        id: 21,
+        lectureNum: 5,
+        lectureName: "Lecture 5: School Health Nursing",
+        title: "Poverty Impacts",
+        focusedSnippet: "physical health problems are related to poverty, poorer health, experience depression and mental health problems and engage in more health risk behaviors",
+        sourceQuote: "21-\nCommon Health Problems of School-Age Children\n\n• Some specific physical health problems are related to poverty (e.g., lead poisoning, iron deficiency anemia, increased susceptibility to illness). \n• Children living in poverty have poorer health and are more likely to suffer from a chronic health condition (e.g., asthma, anemia), as well as injuries and accidents. \n• Adolescents living in poverty, they more often experience depression and mental health problems and engage in more health risk behaviors (e.g., smoking, early sexual activity)\n\nfocused \" physical health problems are related to poverty, poorer health, experience depression and mental health problems and engage in more health risk behaviors \"",
+        hint: "Deprivation elevates chronic physical morbidity, adolescent depression, and high-risk behaviors.",
+        question: "Which of the following describes the health status of school-aged children and adolescents living in poverty?",
+        options: [
+          "They suffer physical health problems related to poverty, poorer health, depression, and engage in more health risk behaviors",
+          "They possess significantly greater resistance to asthma and environmental toxins",
+          "Their risk of suffering depressive disorders or substance abuse is practically nonexistent",
+          "Socioeconomic hardship exhibits no correlation with childhood nutritional anemia"
+        ],
+        answer: 0,
+        explanation: "Poverty predisposes children to chronic diseases (lead poisoning, asthma, anemia), and adolescents experience higher depression rates and risk-taking behaviors."
+      },
+      {
+        id: 22,
+        lectureNum: 5,
+        lectureName: "Lecture 5: School Health Nursing",
+        title: "Head Lice (Pediculosis)",
+        focusedSnippet: "educate families about reducing reinfestations by careful application of pediculicides, retreating in 2 weeks if necessary, and cleaning of any fomites",
+        sourceQuote: "22-\nCommon Health Problems of School-Age Children\nHead lice\n• Preschoolers and elementary- age children and their caretakers and family members are at highest risk for head lice.\n• School nurses and PHNs need to educate families about reducing reinfestations by careful application of pediculicides, retreating in 2 weeks if necessary, and cleaning of any fomites (e.g., combs, hats, towels, sheets, clothing, upholstered furniture) and removal of any viable nits. \n\nfocused \" educate families about reducing reinfestations by careful application of pediculicides, retreating in 2 weeks if necessary, and cleaning of any fomites\"",
+        hint: "Topical pediculicides, a 14-day repeat cycle if required, and laundering hats and combs.",
+        question: "To combat head lice (pediculosis) in schools, what primary education must the nurse impart to parents?",
+        options: [
+          "Educate families about reducing reinfestations by careful application of pediculicides, retreating in 2 weeks if necessary, and cleaning of any fomites",
+          "Prescribe high-dose systemic oral steroids to all classroom contacts",
+          "Shave the scalps of all children in the elementary school prophylactically",
+          "Quarantine affected children at home for 90 days"
+        ],
+        answer: 0,
+        explanation: "Eradication requires meticulous pediculicide application, potential retreat at 2 weeks, decontamination of fomites (linens, hats, combs), and nit removal."
+      },
+      {
+        id: 23,
+        lectureNum: 5,
+        lectureName: "Lecture 5: School Health Nursing",
+        title: "School Prevention Levels",
+        focusedSnippet: "Immunizations",
+        sourceQuote: "23-\nLevels of Prevention in School Context \nPrimary Prevention\n• Immunizations: School nurses promote and support students’ vaccination according to recommended immunization schedules to prevent vaccine preventable diseases. \n• Violence Prevention: School nurses provide education and awareness programs to prevent bullying, violence, and other forms of aggression among students. \n• Outreach to Immigrant Populations: School nurses provide culturally appropriate health education and connect immigrant students and their families with available health services to prevent health problems and improve access to care.\n\nfocused \" Immunizations\"",
+        hint: "Vaccinating students against preventable diseases before contagion occurs.",
+        question: "Promoting and verifying student compliance with required vaccination schedules is an example of which level of prevention?",
+        options: [
+          "Primary prevention through Immunizations",
+          "Secondary prevention through scoliosis screening",
+          "Tertiary physical therapy rehabilitation",
+          "Quaternary administrative auditing"
+        ],
+        answer: 0,
+        explanation: "Supporting recommended immunization schedules falls under primary prevention, safeguarding pupils from acquiring communicable diseases."
+      },
+      {
+        id: 24,
+        lectureNum: 5,
+        lectureName: "Lecture 5: School Health Nursing",
+        title: "Roles of School Nurse",
+        focusedSnippet: "early intervention",
+        sourceQuote: "24-\nKey Roles of the School Nurse \n1. Facilitates the normal development of students and promotes positive intervention outcomes.\n2. Provides leadership in the areas of health promotion, safety, and a healthy school environment.\n3. Provides high-quality health care and promotes early intervention for actual and potential student health problems.\n4. Uses sound clinical judgment in the provision of case management for students.\n5. Collaborates actively and professionally with others to promote student/family capacity for self-management and adaptation, as well as learning and self advocacy.\n\nfocused \" early intervention\"",
+        hint: "Promptly addressing acute or emerging student ailments to avoid complications.",
+        question: "A primary key role of the school nurse is providing quality healthcare while championing what critical action?",
+        options: [
+          "Promoting early intervention for actual and potential student health problems",
+          "Performing non-emergent surgical laparotomies in classrooms",
+          "Administering penal discipline for student truancy",
+          "Auditing school district bond investment portfolios"
+        ],
+        answer: 0,
+        explanation: "The school nurse provides high-standard clinical care and champions early intervention for emerging or active student physical and emotional issues."
+      },
+      {
+        id: 25,
+        lectureNum: 5,
+        lectureName: "Lecture 5: School Health Nursing",
+        title: "Responsibilities of Nurse",
+        focusedSnippet: "first aid",
+        sourceQuote: "25-\nResponsibilities of the School Nurse \n1) Prevent illness, promote & maintain health of school community.\n2) Identify health-related barriers to learning.\n3) Care of children with special health needs.\n4) General and emergency first aid.\n5) Vision, hearing, scoliosis, and TB screenings; height, weight, and blood pressure monitoring; oral health and dental education; immunization assessment and monitoring.\n6) Medication administration; assessment of acute health problems.\n7) Health examinations, referrals. \n8) Participate in emergency planning and disaster drills, as well as school evacuation plans.\n9) Training staff in CPR, infection precautions, first aid.\n10) Overseeing the health and wellness of school staff.\n\nfocused \" first aid\"",
+        hint: "Initial emergent triage delivered immediately following traumatic accidents or sudden illness.",
+        question: "Which of the following constitutes an everyday core responsibility of the school nurse?",
+        options: [
+          "Delivering general and emergency first aid to students and staff",
+          "Authoring regional educational curriculum legislation",
+          "Prescribing schedule II narcotics to faculty",
+          "Operating complex mechanical ventilator units on the playground"
+        ],
+        answer: 0,
+        explanation: "Providing immediate general and emergency first aid for sudden injuries and acute health flares is an essential daily duty of the school nurse."
+      },
+      {
+        id: 26,
+        lectureNum: 6,
+        lectureName: "Lecture 6: Health Promotion / Community Mobilization",
+        title: "Tertiary Prevention",
+        focusedSnippet: "Postmastectomy exercise programs to restore function",
+        sourceQuote: "26-\nTertiary prevention\n• Tertiary prevention attempts to reduce the extent and severity of a health problem to its lowest possible level, so as to minimize disability and restore or preserve function.\nExamples\n• Include treatment and rehabilitation of persons after a stroke to reduce impairment\n• Postmastectomy exercise programs to restore function\n• Treatment and management of diabetes to reduce problems or slow their progress\n\nfocused \" Postmastectomy exercise programs to restore function\"",
+        hint: "Therapeutic physical conditioning after breast cancer surgery to restore limb motion.",
+        question: "Which of the following interventions exemplifies tertiary prevention?",
+        options: [
+          "Postmastectomy exercise programs designed to restore function",
+          "Administering HPV vaccines to elementary students",
+          "Conducting mobile mammography screenings in shopping centers",
+          "Distributing clean handwashing posters to daycares"
+        ],
+        answer: 0,
+        explanation: "Postmastectomy exercise programs aim to rehabilitate physical movement and mitigate disability following surgical oncology, defining tertiary prevention."
+      },
+      {
+        id: 27,
+        lectureNum: 6,
+        lectureName: "Lecture 6: Health Promotion / Community Mobilization",
+        title: "Evolutionary Change",
+        focusedSnippet: "examples of evolutionary change include becoming parents, gradually cutting back on the number of cigarettes smoked each day, and losing weight by eliminating desserts and snacks",
+        sourceQuote: "27-\nEvolutionary change\n• Evolutionary change is change that is gradual and requires adjustment on an incremental basis. It modifies rather than replaces a current way of operating. Some examples of evolutionary change include becoming parents, gradually cutting back on the number of cigarettes smoked each day, and losing weight by eliminating desserts and snacks. Gradual change may “ease the pain” that change brings to some individuals. Sometimes, this type of change may be viewed as reform.\n\nfocused \" examples of evolutionary change include becoming parents, gradually cutting back on the number of cigarettes smoked each day, and losing weight by eliminating desserts and snacks\"",
+        hint: "Incremental, phased lifestyle adjustments such as tapering cigarettes or cutting desserts.",
+        question: "Gradually cutting back on the daily number of cigarettes smoked or eliminating desserts step-by-step to lose weight exemplifies which type of change?",
+        options: [
+          "Evolutionary change",
+          "Revolutionary change",
+          "Coercive cataclysmic change",
+          "Imposed statutory change"
+        ],
+        answer: 0,
+        explanation: "Evolutionary change occurs incrementally and gradually, modifying daily habits—such as slowly decreasing cigarettes or desserts—to ease adjustment."
+      },
+      {
+        id: 28,
+        lectureNum: 6,
+        lectureName: "Lecture 6: Health Promotion / Community Mobilization",
+        title: "Revolutionary Change",
+        focusedSnippet: "Sudden unemployment, stopping smoking overnight or removing children from abusive parents are examples of revolutionary changes",
+        sourceQuote: "28-\nRevolutionary change\n• in contrast, is a more rapid, drastic, and threatening type of change. It involves different goals and perhaps radically new patterns of behavior. Sudden unemployment, stopping smoking overnight or removing children from abusive parents are examples of revolutionary changes.\n• The people affected have little or no advance warning and little or no time to prepare. High levels of emotional, mental, and sometimes physical energy and rapid behavior change are required to adapt to revolutionary change. If the demands are too great, some may experience defense mechanisms such as incapacitation, resistance, or denial of the new situation.\n\nfocused \" Sudden unemployment, stopping smoking overnight or removing children from abusive parents are examples of revolutionary changes \"",
+        hint: "Abrupt, dramatic life upheaval occurring without advance notice.",
+        question: "Which of the following scenarios represents a revolutionary change?",
+        options: [
+          "Sudden unemployment, stopping smoking overnight, or removing children from abusive parents",
+          "Tapering caloric intake by 50 calories per month over 3 years",
+          "The natural gradual transition from adolescence into adulthood",
+          "Slowly reducing nicotine patch doses over twelve weeks"
+        ],
+        answer: 0,
+        explanation: "Revolutionary changes are drastic, unexpected, and abrupt shifts—such as sudden job loss or quitting smoking overnight—with little advance preparation."
+      },
+      {
+        id: 29,
+        lectureNum: 6,
+        lectureName: "Lecture 6: Health Promotion / Community Mobilization",
+        title: "Empiric–Rational Strategies",
+        focusedSnippet: "new information is offered to people., responsibility",
+        sourceQuote: "29-\nEmpiric–Rational Change Strategies\nEmpiric–rational change strategies are used to effect change based on the assumption that people are rational and, when presented with empiric information, will adopt new practices that appear to be in their best interest.\nTo use this approach, which is common in community health, new information is offered to people. The nurse/change agent uses empiric–rational strategies with clients who can assume a relatively high degree of responsibility for their own health.\n\nfocused \" new information is offered to people., responsibility \"",
+        hint: "Assumes rational people adopt healthy choices once educated with objective data.",
+        question: "When employing an empiric-rational change strategy, the community health nurse relies on what central premise?",
+        options: [
+          "People are rational and will adopt beneficial behaviors when new information is offered to them and they assume responsibility",
+          "People will only comply when threatened with coercive fines and legal incarceration",
+          "Human beings are incapable of logical self-interest regarding their health",
+          "Behavior change relies exclusively on emotional peer pressure without scientific evidence"
+        ],
+        answer: 0,
+        explanation: "Empiric-rational approaches assume people make reasoned choices in their self-interest when presented with scientific facts and supported in taking personal responsibility."
+      },
+      {
+        id: 30,
+        lectureNum: 6,
+        lectureName: "Lecture 6: Health Promotion / Community Mobilization",
+        title: "Mobilization Action Cycle",
+        focusedSnippet: "Identify key actors and stakeholders",
+        sourceQuote: "30-\nCommunity Mobilization\nThe action cycle of community mobilization\n• Step 1 Identify a significant health problem, for example female circumcision.\n• Step 2 Plan and select a strategy to solve the problem (for example, conduct a workshop for influential people in the community for sensitization on the issue).\n• Step 3 Identify key actors and stakeholders (village chief, Imam, heads of families, etc.)\n• Step 4 Mobilize these key actors and stakeholders for action (discussions and agreement on what to do).\n• Step 5 Implement activities to work towards a solution (capitalize on the sensitization of the people created by the workshop and intensify this through various follow-up activities).\n• Step 6 Assess the results of the activities carried out to solve the problem.\n• Step 7 Improve activities, based on the findings of the assessment.\n\nfocused \" Identify key actors and stakeholders \"",
+        hint: "Engaging influential local figures such as the village chief, religious leaders, and family heads.",
+        question: "In the 7-step action cycle of community mobilization, what vital task is executed in Step 3?",
+        options: [
+          "Identify key actors and stakeholders (e.g., village chief, Imam, heads of families)",
+          "Perform final post-intervention statistical regression analysis",
+          "Dissolve the community advocacy alliance permanently",
+          "Enforce regional curfew policies through local police squads"
+        ],
+        answer: 0,
+        explanation: "Step 3 of community mobilization is explicitly: Identify key actors and stakeholders (such as village chiefs, religious authorities, and clan heads) to build leadership support."
+      }
+    ];
+
+    /* APP CONTROLLER STATE */
+    let activeTab = 'notes';
+    let quizMode = 'single';
+    let currentQIndex = 0;
+    let userPicks = {};
+    let eliminatedPicks = {};
+    let score = 0;
+    let streak = 0;
+
+    let timerConfig = {
+      questionSeconds: 15,
+      advanceSeconds: 10,
+      showAudioTicks: true,
+      showHudCountdown: true
+    };
+
+    let qTimeRemaining = 15;
+    let qTimerInterval = null;
+    let isExamPaused = false;
+
+    let advTimeRemaining = 10;
+    let advTimerInterval = null;
+    let isAdvPaused = false;
+
+    /* TAB SWITCHING */
+    function switchTab(tabId) {
+      activeTab = tabId;
+      document.getElementById('tab-notes-view').classList.toggle('hidden', tabId !== 'notes');
+      document.getElementById('tab-quiz-view').classList.toggle('hidden', tabId !== 'quiz');
+      document.getElementById('tab-cards-view').classList.toggle('hidden', tabId !== 'cards');
+
+      const tabs = ['notes', 'quiz', 'cards'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`nav-btn-${t}`);
+        if (t === tabId) {
+          btn.className = "px-4 py-2 rounded-lg transition-all text-white bg-blue-600 shadow-md font-bold";
+        } else {
+          btn.className = "px-4 py-2 rounded-lg transition-all text-slate-400 hover:text-white font-medium";
+        }
+      });
+
+      if (tabId === 'quiz') {
+        renderQuiz();
+      } else if (tabId === 'cards') {
+        renderFlashcards();
+      }
+    }
+
+    /* STUDY NOTES RENDERING - Complete text restored */
+    function renderStudyNotes(filterLecture = 'all', searchQuery = '') {
+      const container = document.getElementById('notes-container');
+      container.innerHTML = '';
+
+      lectureModules.forEach(module => {
+        if (filterLecture !== 'all' && module.num !== parseInt(filterLecture)) return;
+
+        // Filter topics by search query
+        const filteredTopics = module.topics.filter(tp => {
+          if (!searchQuery) return true;
+          const searchTarget = (tp.title + ' ' + tp.bullets.join(' ') + ' ' + tp.focusedText).toLowerCase();
+          return searchTarget.includes(searchQuery.toLowerCase());
+        });
+
+        if (searchQuery && filteredTopics.length === 0 && !module.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+          return;
+        }
+
+        const section = document.createElement('div');
+        section.id = `lecture-card-${module.num}`;
+        section.className = "bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-xl space-y-5 transition-all";
+
+        let accentColor = "text-blue-400 border-blue-500/30 bg-blue-500/10";
+        if (module.num === 2) accentColor = "text-indigo-400 border-indigo-500/30 bg-indigo-500/10";
+        if (module.num === 3) accentColor = "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
+        if (module.num === 4) accentColor = "text-cyan-400 border-cyan-500/30 bg-cyan-500/10";
+        if (module.num === 5) accentColor = "text-purple-400 border-purple-500/30 bg-purple-500/10";
+        if (module.num === 6) accentColor = "text-amber-400 border-amber-500/30 bg-amber-500/10";
+
+        // Optional Overview / Intro text if lecture has one (e.g. Lecture 1)
+        let overviewHtml = '';
+        if (module.overview && module.overview.length > 0) {
+          let listItems = module.overview.map(ov => `<li class="leading-relaxed text-slate-300">${ov}</li>`).join('');
+          overviewHtml = `
+            <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-xs sm:text-sm space-y-2 mb-4">
+              <div class="text-[11px] font-mono-code font-bold text-slate-400 uppercase tracking-wider">Lecture Overview & Core Foundations:</div>
+              <ul class="list-disc pl-5 space-y-1.5">${listItems}</ul>
+            </div>
+          `;
+        }
+
+        // Render each topic with all bullets
+        let topicsHtml = '';
+        const topicsList = searchQuery ? filteredTopics : module.topics;
+
+        topicsList.forEach(topic => {
+          let bulletPoints = topic.bullets.map(b => `<li class="leading-relaxed text-slate-300">${b}</li>`).join('');
+          topicsHtml += `
+            <div class="p-4 sm:p-5 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-3 hover:border-slate-700 transition">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-700 text-xs font-mono-code font-bold text-amber-400">
+                    Point ${topic.numStr}
+                  </span>
+                  <h4 class="text-sm sm:text-base font-bold text-white">${topic.title}</h4>
+                </div>
+                <button onclick="jumpToQuizItem(${topic.id})" class="text-xs px-2.5 py-1 rounded-lg bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600 hover:text-white transition font-medium flex items-center gap-1">
+                  Practice MCQ ↗
+                </button>
+              </div>
+
+              <!-- Unedited Bullet Points with Highlighted Focused Text -->
+              <ul class="list-disc pl-5 space-y-2 text-xs sm:text-sm">
+                ${bulletPoints}
+              </ul>
+
+              <!-- Clean Focused Key Takeaway pill -->
+              <div class="pt-2 border-t border-slate-800/80 flex items-start gap-2 text-xs text-slate-400">
+                <span class="text-amber-400 font-bold font-mono-code shrink-0">FOCUSED:</span>
+                <span class="text-amber-300 font-semibold italic">"${topic.focusedText}"</span>
+              </div>
+            </div>
+          `;
+        });
+
+        section.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3.5 flex-wrap gap-2">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 rounded-lg border text-xs font-mono-code font-bold ${accentColor}">
+                LECTURE 0${module.num}
+              </span>
+              <h3 class="text-base sm:text-lg font-bold text-white tracking-tight">${module.title}</h3>
+            </div>
+            <span class="text-xs text-slate-400 font-mono-code">${topicsList.length} Core Concepts</span>
+          </div>
+          ${overviewHtml}
+          <div class="space-y-3.5">
+            ${topicsHtml}
+          </div>
+        `;
+
+        container.appendChild(section);
+      });
+    }
+
+    function handleNotesSearch(val) {
+      const activeChip = document.querySelector('.lec-chip.active');
+      const lecVal = activeChip ? activeChip.innerText : 'All';
+      let num = 'all';
+      if (lecVal.includes('Lec 1')) num = 1;
+      else if (lecVal.includes('Lec 2')) num = 2;
+      else if (lecVal.includes('Lec 3')) num = 3;
+      else if (lecVal.includes('Lec 4')) num = 4;
+      else if (lecVal.includes('Lec 5')) num = 5;
+      else if (lecVal.includes('Lec 6')) num = 6;
+      renderStudyNotes(num, val);
+    }
+
+    function filterNotesByLecture(num) {
+      document.querySelectorAll('.lec-chip').forEach(btn => {
+        btn.classList.remove('active', 'bg-blue-600', 'text-white');
+        btn.classList.add('bg-slate-800', 'text-slate-300');
+      });
+      event.target.classList.add('active', 'bg-blue-600', 'text-white');
+      event.target.classList.remove('bg-slate-800', 'text-slate-300');
+
+      const searchVal = document.getElementById('notes-search-input').value;
+      renderStudyNotes(num, searchVal);
+    }
+
+    function expandAllLectureCards(expand) {
+      document.querySelectorAll('#notes-container > div').forEach(sec => {
+        const bodyDiv = sec.querySelector('.space-y-3\\.5');
+        if (bodyDiv) bodyDiv.style.display = expand ? 'block' : 'none';
+      });
+    }
+
+    function jumpToQuizItem(id) {
+      switchTab('quiz');
+      const idx = masterItems.findIndex(it => it.id === id);
+      if (idx !== -1) {
+        currentQIndex = idx;
+        renderQuiz();
+      }
+    }
+
+    /* QUIZ RENDERING (No Card Fading, Full Visibility) */
+    function renderQuiz() {
+      const mount = document.getElementById('quiz-cards-container');
+      mount.innerHTML = '';
+
+      renderQuizDots();
+
+      const itemsToRender = quizMode === 'single' ? [masterItems[currentQIndex]] : masterItems;
+
+      itemsToRender.forEach((item, relIdx) => {
+        const itemNumber = quizMode === 'single' ? currentQIndex + 1 : relIdx + 1;
+        const isAnswered = userPicks[item.id] !== undefined;
+        const pickedIdx = userPicks[item.id];
+        const isCorrect = isAnswered && pickedIdx === item.answer;
+
+        const card = document.createElement('div');
+        card.id = `quiz-card-${item.id}`;
+        card.className = "bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-xl space-y-5 transition-all";
+        // STRICT REQUIREMENT: ZERO CARD FADING
+        card.style.opacity = '1';
+
+        let optionsHtml = '';
+        item.options.forEach((optText, optIdx) => {
+          const isElim = (eliminatedPicks[item.id] || []).includes(optIdx);
+          let btnClass = "w-full text-left p-3.5 sm:p-4 rounded-xl border border-slate-800 bg-slate-950/70 hover:bg-slate-800/80 transition flex items-start justify-between text-xs sm:text-sm font-medium gap-3 ";
+
+          if (isElim) btnClass += "option-eliminated-state ";
+          if (isAnswered) {
+            if (optIdx === item.answer) btnClass += "option-correct-state shadow ";
+            else if (optIdx === pickedIdx) btnClass += "option-wrong-state shadow ";
+          }
+
+          optionsHtml += `
+            <button 
+              onclick="handlePickOption(${item.id}, ${optIdx})" 
+              class="${btnClass}"
+              ${isAnswered || isElim ? 'disabled' : ''}>
+              <span class="flex items-start gap-2.5">
+                <span class="font-mono-code font-bold text-blue-400">${String.fromCharCode(65 + optIdx)}.</span>
+                <span class="text-slate-200">${optText}</span>
+              </span>
+              ${isAnswered && optIdx === item.answer ? '<span class="text-emerald-400 font-bold">✓</span>' : ''}
+              ${isAnswered && optIdx === pickedIdx && pickedIdx !== item.answer ? '<span class="text-rose-400 font-bold">✗</span>' : ''}
+            </button>
+          `;
+        });
+
+        card.innerHTML = `
+          <!-- Meta Header -->
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-mono-code font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              ${item.lectureName}
+            </span>
+            <span class="text-xs font-mono-code text-slate-400">
+              Item ${itemNumber} of 30
+            </span>
+          </div>
+
+          <!-- Question Body -->
+          <h3 class="text-base sm:text-lg font-bold text-white leading-relaxed">
+            <span class="text-amber-400 font-mono-code mr-1">${itemNumber}.</span> ${item.question}
+          </h3>
+
+          <!-- Hint Drawer -->
+          <div id="hint-drawer-${item.id}" class="hidden p-3.5 rounded-xl bg-blue-950/40 border border-blue-600/30 text-blue-300 text-xs leading-relaxed">
+            💡 <strong class="text-blue-200">Study Clue:</strong> ${item.hint}
+          </div>
+
+          <!-- Options Grid -->
+          <div class="space-y-2.5">
+            ${optionsHtml}
+          </div>
+
+          <!-- Real-Time Evaluation Box -->
+          <div class="${isAnswered ? 'block' : 'hidden'} p-4 rounded-xl border text-xs sm:text-sm leading-relaxed ${isCorrect ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200' : 'bg-rose-950/40 border-rose-500/40 text-rose-200'}">
+            <div class="font-bold flex items-center gap-1.5 mb-1">
+              ${isCorrect ? '✅ Correct Choice' : (pickedIdx === -1 ? '⏰ Time Expired' : '❌ Incorrect Choice')}
+            </div>
+            <p>${item.explanation}</p>
+          </div>
+
+          <!-- Official Full Source Text Citation (Revealed Post-Answer) -->
+          <div class="${isAnswered ? 'block' : 'hidden'} p-4 rounded-xl border border-amber-500/30 bg-amber-950/20 text-slate-300 text-xs space-y-2">
+            <div class="flex items-center justify-between text-amber-400 font-bold uppercase tracking-wider text-[11px] font-mono-code">
+              <span>📖 Source Lecture Citation</span>
+              <span>Lec 0${item.lectureNum}</span>
+            </div>
+            <div class="p-3 rounded-lg bg-black/50 border border-slate-800 font-mono-code text-xs whitespace-pre-line text-slate-300 leading-normal">
+              ${item.sourceQuote}
+            </div>
+          </div>
+
+          <!-- Auto Advance Delay Visual Bar (Single View) -->
+          <div id="adv-bar-container-${item.id}" class="hidden w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800">
+            <div id="adv-bar-fill-${item.id}" class="bg-amber-500 h-full w-full transition-all duration-1000"></div>
+          </div>
+
+          <!-- Card Actions Footer -->
+          <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-xs flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+              <button onclick="revealHint(${item.id})" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium border border-slate-700" ${isAnswered ? 'disabled' : ''}>
+                💡 Hint
+              </button>
+              <button onclick="apply5050Lifeline(${item.id})" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium border border-slate-700 disabled:opacity-30" ${isAnswered || (eliminatedPicks[item.id] && eliminatedPicks[item.id].length > 0) ? 'disabled' : ''}>
+                ✂️ 50/50 Lifeline
+              </button>
+            </div>
+            <span id="adv-status-${item.id}" class="text-slate-400 font-mono-code text-[11px]">
+              ${isAnswered ? 'Answer recorded' : (timerConfig.questionSeconds > 0 ? `${timerConfig.questionSeconds}s timer active (No fading)` : 'Untimed Mode')}
+            </span>
+          </div>
+        `;
+        mount.appendChild(card);
+      });
+
+      updateProgressStats();
+
+      if (quizMode === 'single') {
+        document.getElementById('quiz-single-indicator').innerText = `Question ${currentQIndex + 1} of 30`;
+        document.getElementById('btn-nav-prev').disabled = currentQIndex === 0;
+        document.getElementById('btn-nav-next').disabled = currentQIndex === masterItems.length - 1;
+        document.getElementById('quiz-single-nav').style.display = 'flex';
+        resetQuestionTimerHUD();
+      } else {
+        document.getElementById('quiz-single-nav').style.display = 'none';
+        document.getElementById('countdown-hud').style.display = 'none';
+        clearInterval(qTimerInterval);
+      }
+    }
+
+    function renderQuizDots() {
+      const matrix = document.getElementById('quiz-dots-matrix');
+      matrix.innerHTML = '';
+
+      masterItems.forEach((item, idx) => {
+        const dot = document.createElement('button');
+        const isAnswered = userPicks[item.id] !== undefined;
+        const isRight = isAnswered && userPicks[item.id] === item.answer;
+        const isActive = quizMode === 'single' && idx === currentQIndex;
+
+        let dotClass = "w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-mono-code font-bold transition flex items-center justify-center border ";
+        if (isActive) {
+          dotClass += "ring-2 ring-blue-400 border-white text-white bg-blue-600 scale-105 ";
+        } else if (isAnswered) {
+          dotClass += isRight 
+            ? "bg-emerald-600/90 border-emerald-500 text-white " 
+            : "bg-rose-600/90 border-rose-500 text-white ";
+        } else {
+          dotClass += "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800 ";
+        }
+
+        dot.className = dotClass;
+        dot.innerText = idx + 1;
+        dot.onclick = () => {
+          clearInterval(advTimerInterval);
+          currentQIndex = idx;
+          if (quizMode === 'single') {
+            renderQuiz();
+          } else {
+            const card = document.getElementById(`quiz-card-${item.id}`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          renderQuizDots();
+        };
+        matrix.appendChild(dot);
+      });
+    }
+
+    function handlePickOption(qId, optIdx) {
+      if (userPicks[qId] !== undefined) return;
+
+      clearInterval(qTimerInterval);
+      const item = masterItems.find(it => it.id === qId);
+      userPicks[qId] = optIdx;
+
+      if (optIdx === item.answer) {
+        score++;
+        streak++;
+        emitAudio('correct');
+        if (streak % 5 === 0) fireConfetti();
+      } else {
+        streak = 0;
+        emitAudio('wrong');
+      }
+
+      document.getElementById('top-score-display').innerText = score;
+      document.getElementById('top-streak-display').innerText = streak;
+
+      renderQuiz();
+
+      if (quizMode === 'single' && currentQIndex < masterItems.length - 1 && timerConfig.advanceSeconds > 0) {
+        startAutoAdvanceCountdown(qId);
+      }
+
+      if (Object.keys(userPicks).length === masterItems.length) {
+        setTimeout(() => {
+          fireConfetti();
+          emitAudio('action');
+          showResultsModal();
+        }, 500);
+      }
+    }
+
+    function startAutoAdvanceCountdown(qId) {
+      clearInterval(advTimerInterval);
+      advTimeRemaining = timerConfig.advanceSeconds;
+
+      const container = document.getElementById(`adv-bar-container-${qId}`);
+      const fill = document.getElementById(`adv-bar-fill-${qId}`);
+      const status = document.getElementById(`adv-status-${qId}`);
+
+      if (container) container.style.display = 'block';
+
+      advTimerInterval = setInterval(() => {
+        if (isExamPaused || isAdvPaused) return;
+
+        advTimeRemaining--;
+        if (fill) fill.style.width = `${(advTimeRemaining / timerConfig.advanceSeconds) * 100}%`;
+        if (status) status.innerText = `Auto-advancing in ${advTimeRemaining}s (click Next or pause)`;
+
+        if (advTimeRemaining <= 0) {
+          clearInterval(advTimerInterval);
+          goToNextQuestion();
+        }
+      }, 1000);
+    }
+
+    function revealHint(qId) {
+      const drawer = document.getElementById(`hint-drawer-${qId}`);
+      if (drawer) {
+        drawer.classList.remove('hidden');
+        emitAudio('action');
+      }
+    }
+
+    function apply5050Lifeline(qId) {
+      if (eliminatedPicks[qId]) return;
+      const item = masterItems.find(it => it.id === qId);
+      const wrong = [0, 1, 2, 3].filter(i => i !== item.answer).sort(() => Math.random() - 0.5);
+      eliminatedPicks[qId] = [wrong[0], wrong[1]];
+      emitAudio('action');
+      renderQuiz();
+    }
+
+    function resetQuestionTimerHUD() {
+      clearInterval(qTimerInterval);
+      const hud = document.getElementById('countdown-hud');
+      const hudNum = document.getElementById('countdown-hud-num');
+      const curItem = masterItems[currentQIndex];
+
+      if (quizMode !== 'single' || userPicks[curItem.id] !== undefined || timerConfig.questionSeconds === 0) {
+        hud.style.display = 'none';
+        return;
+      }
+
+      hud.style.display = timerConfig.showHudCountdown ? 'block' : 'none';
+      qTimeRemaining = timerConfig.questionSeconds;
+      hudNum.innerText = qTimeRemaining;
+      hudNum.className = "font-mono-code text-5xl font-black text-amber-500 drop-shadow-md";
+
+      qTimerInterval = setInterval(() => {
+        if (isExamPaused) return;
+
+        qTimeRemaining--;
+        hudNum.innerText = qTimeRemaining;
+
+        if (qTimeRemaining <= 5 && qTimeRemaining > 0) {
+          if (timerConfig.showAudioTicks) emitAudio('tick');
+          hudNum.className = "font-mono-code text-5xl font-black text-rose-500 animate-pulse drop-shadow-lg";
+        }
+
+        if (qTimeRemaining <= 0) {
+          clearInterval(qTimerInterval);
+          if (userPicks[curItem.id] === undefined) {
+            handlePickOption(curItem.id, -1);
+          }
+        }
+      }, 1000);
+    }
+
+    function goToNextQuestion() {
+      clearInterval(advTimerInterval);
+      if (currentQIndex < masterItems.length - 1) {
+        currentQIndex++;
+        renderQuiz();
+      }
+    }
+
+    function goToPrevQuestion() {
+      clearInterval(advTimerInterval);
+      if (currentQIndex > 0) {
+        currentQIndex--;
+        renderQuiz();
+      }
+    }
+
+    function setQuizMode(mode) {
+      quizMode = mode;
+      document.getElementById('btn-quiz-single').className = mode === 'single' 
+        ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow"
+        : "px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300";
+
+      document.getElementById('btn-quiz-list').className = mode === 'list' 
+        ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow"
+        : "px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300";
+
+      renderQuiz();
+    }
+
+    function togglePauseExam() {
+      isExamPaused = !isExamPaused;
+      document.getElementById('btn-quiz-pause').innerText = isExamPaused ? "▶️ Resume Timer" : "⏸️ Pause Timer";
+    }
+
+    function toggleAutoAdvance() {
+      isAdvPaused = !isAdvPaused;
+      document.getElementById('btn-advance-pause').innerText = isAdvPaused ? "▶️ Resume Auto-Next" : "⏸️ Pause Auto-Next";
+    }
+
+    function shuffleQuestions() {
+      if (Object.keys(userPicks).length > 0) {
+        showCustomConfirm("Shuffling will reset your current progress and randomize question order. Proceed?", () => {
+          executeShuffle();
+        });
+      } else {
+        executeShuffle();
+      }
+    }
+
+    function executeShuffle() {
+      clearInterval(advTimerInterval);
+      clearInterval(qTimerInterval);
+
+      masterItems.sort(() => Math.random() - 0.5);
+      masterItems.forEach(item => {
+        const correctText = item.options[item.answer];
+        item.options.sort(() => Math.random() - 0.5);
+        item.answer = item.options.indexOf(correctText);
+      });
+
+      userPicks = {};
+      eliminatedPicks = {};
+      score = 0;
+      streak = 0;
+      currentQIndex = 0;
+      document.getElementById('top-score-display').innerText = '0';
+      document.getElementById('top-streak-display').innerText = '0';
+      renderQuiz();
+    }
+
+    function resetQuizState() {
+      showCustomConfirm("Are you sure you want to reset all answers and scores?", () => {
+        clearInterval(advTimerInterval);
+        clearInterval(qTimerInterval);
+        userPicks = {};
+        eliminatedPicks = {};
+        score = 0;
+        streak = 0;
+        currentQIndex = 0;
+        document.getElementById('top-score-display').innerText = '0';
+        document.getElementById('top-streak-display').innerText = '0';
+        renderQuiz();
+      });
+    }
+
+    function updateProgressStats() {
+      const count = Object.keys(userPicks).length;
+      const pct = Math.round((count / masterItems.length) * 100);
+      document.getElementById('quiz-answered-count').innerText = `Answered: ${count} / ${masterItems.length}`;
+      document.getElementById('quiz-percentage').innerText = `${pct}% Completed`;
+      document.getElementById('quiz-progress-fill').style.width = `${pct}%`;
+    }
+
+    /* FLASHCARDS RENDERING */
+    function renderFlashcards() {
+      const grid = document.getElementById('flashcards-grid');
+      grid.innerHTML = '';
+
+      masterItems.forEach(item => {
+        const cardContainer = document.createElement('div');
+        cardContainer.className = "perspective-card h-64 cursor-pointer select-none";
+        cardContainer.onclick = function() {
+          const inner = this.querySelector('.card-inner');
+          inner.classList.toggle('is-flipped');
+          emitAudio('action');
+        };
+
+        cardContainer.innerHTML = `
+          <div class="card-inner">
+            <!-- Front Face -->
+            <div class="card-face p-6 bg-slate-900 border border-slate-800 flex flex-col justify-between shadow-xl">
+              <div class="flex items-center justify-between text-xs">
+                <span class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-mono-code font-bold">Lec 0${item.lectureNum}</span>
+                <span class="text-slate-500 font-mono-code">Card #${item.id}</span>
+              </div>
+              <div class="space-y-2">
+                <div class="text-xs font-bold text-amber-400 uppercase tracking-wider font-mono-code">${item.title}</div>
+                <div class="text-base font-extrabold text-white leading-snug">${item.question}</div>
+              </div>
+              <div class="text-[11px] text-slate-500 flex items-center justify-center gap-1 font-mono-code">
+                <span>🔄 Click to flip for answer</span>
+              </div>
+            </div>
+
+            <!-- Back Face -->
+            <div class="card-face card-back p-6 bg-gradient-to-br from-slate-900 via-blue-950/60 to-slate-900 border border-blue-500/40 flex flex-col justify-between shadow-2xl text-left">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-emerald-400 font-mono-code font-bold">✓ CORE TAKEAWAY</span>
+                <span class="text-xs text-slate-400 font-mono-code">Lec 0${item.lectureNum}</span>
+              </div>
+              <div class="space-y-2">
+                <div class="text-xs font-bold text-slate-400 uppercase font-mono-code">Focused Definition:</div>
+                <div class="text-sm font-bold text-amber-300 leading-relaxed">${item.focusedSnippet}</div>
+              </div>
+              <div class="text-[11px] text-slate-400 border-t border-slate-800 pt-2 font-mono-code">
+                💡 ${item.hint}
+              </div>
+            </div>
+          </div>
+        `;
+        grid.appendChild(cardContainer);
+      });
+    }
+
+    function flipAllCards(flipToBack) {
+      document.querySelectorAll('.card-inner').forEach(inner => {
+        if (flipToBack) inner.classList.add('is-flipped');
+        else inner.classList.remove('is-flipped');
+      });
+      emitAudio('action');
+    }
+
+    /* TIMER SETTINGS DRAWER */
+    function openTimerDrawer() {
+      document.getElementById('input-q-seconds').value = timerConfig.questionSeconds;
+      document.getElementById('input-advance-seconds').value = timerConfig.advanceSeconds;
+      document.getElementById('check-audio-ticks').checked = timerConfig.showAudioTicks;
+      document.getElementById('check-show-countdown-number').checked = timerConfig.showHudCountdown;
+
+      updateTimerPreviewLabel(timerConfig.questionSeconds, 'q');
+      updateTimerPreviewLabel(timerConfig.advanceSeconds, 'adv');
+
+      document.getElementById('timer-modal').style.display = 'flex';
+    }
+
+    function closeTimerDrawer() {
+      document.getElementById('timer-modal').style.display = 'none';
+    }
+
+    function updateTimerPreviewLabel(val, type) {
+      const v = parseInt(val, 10);
+      if (type === 'q') {
+        document.getElementById('label-per-question-time').innerText = v === 0 ? "Untimed (∞)" : `${v}s`;
+      } else {
+        document.getElementById('label-advance-delay').innerText = v === 0 ? "Disabled (Manual)" : `${v}s`;
+      }
+    }
+
+    function restoreTimerDefaults() {
+      document.getElementById('input-q-seconds').value = 15;
+      document.getElementById('input-advance-seconds').value = 10;
+      document.getElementById('check-audio-ticks').checked = true;
+      document.getElementById('check-show-countdown-number').checked = true;
+      updateTimerPreviewLabel(15, 'q');
+      updateTimerPreviewLabel(10, 'adv');
+    }
+
+    function saveTimerSettings() {
+      timerConfig.questionSeconds = parseInt(document.getElementById('input-q-seconds').value, 10);
+      timerConfig.advanceSeconds = parseInt(document.getElementById('input-advance-seconds').value, 10);
+      timerConfig.showAudioTicks = document.getElementById('check-audio-ticks').checked;
+      timerConfig.showHudCountdown = document.getElementById('check-show-countdown-number').checked;
+
+      const summary = timerConfig.questionSeconds === 0 ? 'Untimed' : `${timerConfig.questionSeconds}s Rule`;
+      document.getElementById('timer-badge-summary').innerText = summary;
+
+      closeTimerDrawer();
+      resetQuestionTimerHUD();
+      renderQuiz();
+    }
+
+    /* CUSTOM CONFIRM MODAL (Never alert() or confirm()) */
+    function showCustomConfirm(message, onConfirm) {
+      const modal = document.createElement('div');
+      modal.className = "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm";
+      modal.innerHTML = `
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 text-center">
+          <div class="text-3xl">⚠️</div>
+          <p class="text-sm text-slate-200 font-semibold">${message}</p>
+          <div class="flex items-center justify-center gap-3 pt-2">
+            <button id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300">
+              Cancel
+            </button>
+            <button id="modal-confirm-btn" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow">
+              Proceed
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      modal.querySelector('#modal-cancel-btn').onclick = () => modal.remove();
+      modal.querySelector('#modal-confirm-btn').onclick = () => {
+        modal.remove();
+        onConfirm();
+      };
+    }
+
+    function showResultsModal() {
+      const pct = Math.round((score / masterItems.length) * 100);
+      const modal = document.createElement('div');
+      modal.className = "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md";
+      modal.innerHTML = `
+        <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-7 max-w-md w-full shadow-2xl text-center space-y-4">
+          <div class="text-5xl">🏆</div>
+          <h2 class="text-xl font-extrabold text-white">Clinical Assessment Complete</h2>
+          <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+            <span class="text-xs font-mono-code text-slate-400">Total Mastery Score:</span>
+            <div class="text-4xl font-black text-amber-400 font-mono-code">${score} / 30</div>
+            <div class="text-sm font-bold text-slate-200">${pct}% Success Rate</div>
+          </div>
+          <p class="text-xs text-slate-400">You have evaluated all 30 primary points across Community Health Nursing Lectures 1–6.</p>
+          <div class="flex gap-2 justify-center pt-2">
+            <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">
+              Review Errors
+            </button>
+            <button onclick="this.closest('.fixed').remove(); executeShuffle();" class="px-5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow">
+              Retake Exam
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    /* Confetti Particle Effects */
+    function fireConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const palette = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+      for (let i = 0; i < 80; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          r: Math.random() * 5 + 2,
+          dx: (Math.random() - 0.5) * 14,
+          dy: (Math.random() - 0.5) * 14 - 3,
+          color: palette[Math.floor(Math.random() * palette.length)],
+          tilt: Math.random() * 10,
+          tiltSpeed: Math.random() * 0.08 + 0.04
+        });
+      }
+
+      let frame = 0;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+        particles.forEach(p => {
+          p.x += p.dx;
+          p.y += p.dy;
+          p.dy += 0.22;
+          p.tilt += p.tiltSpeed;
+          if (p.y < canvas.height) active = true;
+
+          ctx.beginPath();
+          ctx.lineWidth = p.r / 2;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + Math.sin(p.tilt) * 10, p.y);
+          ctx.lineTo(p.x + Math.sin(p.tilt) * 10 + p.r, p.y + p.r);
+          ctx.stroke();
+        });
+
+        if (active && frame < 90) {
+          frame++;
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animate();
+    }
+
+    /* Initialization */
+    window.addEventListener('DOMContentLoaded', () => {
+      renderStudyNotes();
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>
